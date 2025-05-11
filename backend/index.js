@@ -5,12 +5,19 @@ const app = express();
 const { createTodo, updateTodo } = require("./types");
 const { dbConnect } = require("./config/dbConnect");
 const { Todo } = require("./db");
+const cors = require("cors");
+
 const PORT = 3000;
 
 // db connection
 dbConnect();
 
 //middlewares
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
 app.use(express.json());
 
 //routes
@@ -49,26 +56,35 @@ app.post("/todo", async (req, res) => {
 app.put("/completed", async (req, res) => {
   const updatedDataPayload = req.body;
   const validatedPayload = updateTodo.safeParse(updatedDataPayload);
+
   if (!validatedPayload.success) {
     return res.status(411).json({
       msg: "You have sent the wrong input",
       success: false,
     });
   }
-  const _id = req.headers.id;
-  //everything is good --> update todo in db
-  const updatedTodo = await Todo.findOneAndUpdate(
-    { _id },
-    {
-      completed: true,
-    },
-    { new: true }
-  );
 
-  return res.status(200).json({
-    success: true,
-    UpdatedTodo: updatedTodo,
-  });
+  try {
+    // Step 1: Find the existing todo
+    const todo = await Todo.findById(updatedDataPayload.id);
+    if (!todo) {
+      return res.status(404).json({ msg: "Todo not found", success: false });
+    }
+
+    // Step 2: Toggle the completed value
+    const updatedTodo = await Todo.findByIdAndUpdate(
+      updatedDataPayload.id,
+      { completed: !todo.completed },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      UpdatedTodo: updatedTodo,
+    });
+  } catch (err) {
+    return res.status(500).json({ msg: "Server error", error: err.message });
+  }
 });
 
 //default route
