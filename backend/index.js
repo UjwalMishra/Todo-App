@@ -54,8 +54,8 @@ app.post("/todo", async (req, res) => {
 });
 
 app.put("/completed", async (req, res) => {
-  const updatedDataPayload = req.body;
-  const validatedPayload = updateTodo.safeParse(updatedDataPayload);
+  const payload = req.body;
+  const validatedPayload = updateTodo.safeParse(payload);
 
   if (!validatedPayload.success) {
     return res.status(411).json({
@@ -66,14 +66,14 @@ app.put("/completed", async (req, res) => {
 
   try {
     // Step 1: Find the existing todo
-    const todo = await Todo.findById(updatedDataPayload.id);
+    const todo = await Todo.findById(payload.id);
     if (!todo) {
       return res.status(404).json({ msg: "Todo not found", success: false });
     }
 
     // Step 2: Toggle the completed value
     const updatedTodo = await Todo.findByIdAndUpdate(
-      updatedDataPayload.id,
+      payload.id,
       { completed: !todo.completed },
       { new: true }
     );
@@ -84,6 +84,29 @@ app.put("/completed", async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ msg: "Server error", error: err.message });
+  }
+});
+
+//delete route
+app.delete("/delete", async (req, res) => {
+  const payload = req.body;
+  const validatedPayload = updateTodo.safeParse(payload);
+
+  if (!validatedPayload.success) {
+    return res.status(411).json({
+      msg: "You have sent the wrong input",
+      success: false,
+    });
+  }
+  //find and delete
+  try {
+    await Todo.findByIdAndDelete({ _id: payload.id });
+    return res.status(200).json({
+      success: true,
+      msg: "todo deleted successfully",
+    });
+  } catch (err) {
+    console.log("Error while deleting todo ", err);
   }
 });
 

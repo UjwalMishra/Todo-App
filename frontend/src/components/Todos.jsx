@@ -1,7 +1,7 @@
 import axios from "axios";
 import React from "react";
 
-function Todos({ todos, btnHandler }) {
+function Todos({ todos, addTodo, deleteTodo }) {
   return (
     <div>
       {todos.map((todo) => {
@@ -9,9 +9,10 @@ function Todos({ todos, btnHandler }) {
           <div key={todo._id}>
             <h1>{todo.title}</h1>
             <p>{todo.description}</p>
-            <button onClick={() => btnHandler(todo._id)}>
+            <button onClick={() => addTodo(todo._id)}>
               {todo.completed ? "Already completed" : "Mark as completed"}
             </button>
+            <button onClick={() => deleteTodo(todo._id)}>Delete</button>
           </div>
         );
       })}
