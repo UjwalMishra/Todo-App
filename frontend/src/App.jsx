@@ -32,7 +32,7 @@ function App() {
   }
   return (
     <>
-      <div>
+      <div className="w-full flex ">
         <CreateTodo fetchData={fetchData} />
         <Todos todos={todos} addTodo={addTodo} deleteTodo={deleteTodo} />
       </div>
